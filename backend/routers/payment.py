@@ -23,6 +23,7 @@ PLATFORM_FEE = 49  # ₹49 convenience fee
 class PaymentRequest(BaseModel):
     trip_total: float = Field(gt=0)
     travel_mode: str = "car"
+    group_size: int = 1
     guide: bool = False
     guide_cost: float = 0
     insurance: bool = False
@@ -30,6 +31,7 @@ class PaymentRequest(BaseModel):
     customer_name: str = "Traveller"
     customer_email: str = ""
     customer_phone: str = ""
+    govt_id_filename: str = ""  # uploaded government ID filename
     destinations: list[str] = []
     days: int = 1
     budget: float = 0  # user's original budget for comparison
@@ -67,8 +69,10 @@ async def process_payment(req: PaymentRequest = Body(...)):
         "trip_summary": {
             "destinations": req.destinations,
             "days": req.days,
+            "group_size": req.group_size,
             "travel_mode": req.travel_mode,
             "guide": req.guide,
+            "govt_id": req.govt_id_filename,
         },
         "breakdown": {
             "trip_cost": subtotal,

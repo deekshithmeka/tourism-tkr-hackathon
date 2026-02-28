@@ -34,6 +34,7 @@ async def get_destinations(
     radius: int = Query(10000, ge=1000, le=50000, description="Search radius (m)"),
     travel_mode: str = Query("car", description="Travel mode: bus, train, plane, car"),
     guide: bool = Query(False, description="Whether a personal guide is needed"),
+    group_size: int = Query(1, ge=1, le=50, description="Number of people in the group"),
 ):
     """
     1. Overpass API  → nearby places + hospitals/police  (OSM — free)
@@ -116,6 +117,7 @@ async def get_destinations(
         cost_data = estimate_cost(
             place["distance_km"], primary_category, travel_mode, guide,
             place_name=place["name"],
+            group_size=group_size,
         )
 
         # Show all places — flag over-budget ones instead of hiding them

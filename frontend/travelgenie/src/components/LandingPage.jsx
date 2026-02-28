@@ -42,6 +42,7 @@ import TrainIcon from "@mui/icons-material/Train";
 import FlightIcon from "@mui/icons-material/Flight";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import PersonIcon from "@mui/icons-material/Person";
+import GroupIcon from "@mui/icons-material/Group";
 import RouteIcon from "@mui/icons-material/Route";
 import parseQuery from "../utils/parseQuery";
 
@@ -162,6 +163,7 @@ export default function LandingPage() {
   const [wizardData, setWizardData] = useState({
     budget: 5000,
     days: 2,
+    groupSize: 1,
     categories: ["Nature"],
     travelMode: "car",
     guide: false,
@@ -274,6 +276,7 @@ export default function LandingPage() {
           budget: result.budget || 5000,
           category: (result.categories?.length ? result.categories : ["Nature"]).join(","),
           days: result.days || 2,
+          groupSize: 1,
           travelMode: result.travelMode || "car",
           guide: result.guide || phcMode,
           phc: result.phc || phcMode,
@@ -322,6 +325,7 @@ export default function LandingPage() {
           budget: result.budget || wizardData.budget,
           category: (result.categories?.length ? result.categories : wizardData.categories).join(","),
           days: result.days || wizardData.days,
+          groupSize: wizardData.groupSize,
           travelMode: result.travelMode || wizardData.travelMode,
           guide: result.guide || wizardData.guide || phcMode,
           phc: result.phc || phcMode,
@@ -848,7 +852,7 @@ export default function LandingPage() {
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Stepper activeStep={wizardStep} alternativeLabel sx={{ mb: 3 }}>
-            {["Budget", "Duration", "Category", "Transport", "Preferences"].map((label) => (
+            {["Budget", "Duration", "Group Size", "Category", "Transport", "Preferences"].map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
               </Step>
@@ -903,8 +907,44 @@ export default function LandingPage() {
             </Box>
           )}
 
-          {/* Step 2: Category */}
+          {/* Step 2: Group Size */}
           {wizardStep === 2 && (
+            <Box sx={{ textAlign: "center", py: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                How many people in your group?
+              </Typography>
+              <Stack direction="row" alignItems="center" justifyContent="center" spacing={3}>
+                <GroupIcon sx={{ fontSize: 40, color: "primary.main" }} />
+                <ToggleButtonGroup
+                  value={wizardData.groupSize}
+                  exclusive
+                  onChange={(e, val) => val && setWizardData((p) => ({ ...p, groupSize: val }))}
+                  sx={{ flexWrap: "wrap", justifyContent: "center" }}
+                >
+                  {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => (
+                    <ToggleButton key={n} value={n} sx={{ px: 3 }}>
+                      {n} {n === 1 ? "Solo" : n === 2 ? "Couple" : "People"}
+                    </ToggleButton>
+                  ))}
+                </ToggleButtonGroup>
+              </Stack>
+              <TextField
+                type="number"
+                label="Custom group size"
+                value={wizardData.groupSize}
+                onChange={(e) => setWizardData((p) => ({ ...p, groupSize: Math.max(1, Math.min(50, parseInt(e.target.value) || 1)) }))}
+                size="small"
+                sx={{ mt: 2, width: 180 }}
+                slotProps={{ input: { inputProps: { min: 1, max: 50 } } }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                Costs like food, entry & activities scale per person. Transport is shared.
+              </Typography>
+            </Box>
+          )}
+
+          {/* Step 3: Category */}
+          {wizardStep === 3 && (
             <Box sx={{ textAlign: "center", py: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 2 }}>
                 What kind of places?
@@ -925,8 +965,8 @@ export default function LandingPage() {
             </Box>
           )}
 
-          {/* Step 3: Transport */}
-          {wizardStep === 3 && (
+          {/* Step 4: Transport */}
+          {wizardStep === 4 && (
             <Box sx={{ textAlign: "center", py: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 2 }}>
                 Mode of transport?
@@ -950,8 +990,8 @@ export default function LandingPage() {
             </Box>
           )}
 
-          {/* Step 4: Preferences */}
-          {wizardStep === 4 && (
+          {/* Step 5: Preferences */}
+          {wizardStep === 5 && (
             <Box sx={{ textAlign: "center", py: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 2 }}>
                 Additional preferences
@@ -998,7 +1038,7 @@ export default function LandingPage() {
             Back
           </Button>
           <Box>
-            {wizardStep < 4 ? (
+            {wizardStep < 5 ? (
               <Button
                 variant="contained"
                 onClick={() => setWizardStep((s) => s + 1)}

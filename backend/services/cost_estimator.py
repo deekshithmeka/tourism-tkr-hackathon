@@ -52,13 +52,16 @@ def estimate_cost(
     travel_mode: str = "car",
     guide: bool = False,
     place_name: str = "",
+    group_size: int = 1,
 ) -> dict:
     """
     Estimate total visit cost (INR) broken down by component.
     Uses per-place variation so every destination has a unique budget.
+    Per-person costs (entry, activity, food) are multiplied by group_size.
+    Transport is shared (not multiplied).
 
     Returns dict with:
-      total, travel, entry, activity, food, guide
+      total, travel, entry, activity, food, guide, group_size
     """
     import hashlib
 
@@ -98,6 +101,13 @@ def estimate_cost(
 
     guide_cost = GUIDE_COST_PER_PLACE if guide else 0
 
+    # Scale per-person costs by group size
+    gs = max(1, group_size)
+    entry *= gs
+    activity *= gs
+    food *= gs
+    guide_cost *= gs  # one guide per person in large groups
+
     total = entry + activity + food + travel_cost + guide_cost
 
     return {
@@ -108,5 +118,6 @@ def estimate_cost(
         "food": food,
         "guide": guide_cost,
         "travel_mode": mode,
+        "group_size": gs,
     }
 

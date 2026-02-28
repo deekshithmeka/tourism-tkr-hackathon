@@ -63,6 +63,7 @@ function ResultsPage() {
   const {
     latitude, longitude, budget, category,
     days: initDays = 2,
+    groupSize: initGroupSize = 1,
     travelMode: initTravelMode = "car",
     guide: initGuide = false,
     phc: initPhc = false,
@@ -101,6 +102,8 @@ function ResultsPage() {
   const [itineraryLoading, setItineraryLoading] = useState(false);
 
   const printRef = useRef(null);
+  const tripTimelineRef = useRef(null);
+  const itinerarySectionRef = useRef(null);
 
   // Compute running trip total
   const tripTotal = itinerary.reduce((sum, p) => sum + p.estimatedCost, 0);
@@ -120,6 +123,7 @@ function ResultsPage() {
           radius: 10000,
           travel_mode: travelMode,
           guide: guideEnabled,
+          group_size: initGroupSize,
         });
         const res = await fetch(`${API_BASE}/api/destinations?${params}`);
         if (!res.ok) throw new Error(`Server error (${res.status})`);
@@ -244,6 +248,7 @@ function ResultsPage() {
           budget,
           category,
           days: initDays,
+          group_size: initGroupSize,
           travel_mode: travelMode,
           guide: guideEnabled,
           phc: initPhc,
@@ -256,6 +261,10 @@ function ResultsPage() {
       setTransportInfo(data.transport || null);
       setGuideInfo(data.guide || null);
       setShowItinerary(true);
+      // Auto-scroll to itinerary section
+      setTimeout(() => {
+        itinerarySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 200);
     } catch (err) {
       console.error("Itinerary error:", err);
       alert("Failed to generate itinerary. Please try again.");
@@ -271,6 +280,7 @@ function ResultsPage() {
       state: {
         tripTotal,
         travelMode,
+        groupSize: initGroupSize,
         guide: guideEnabled,
         guideCost: itineraryPlan?.guide_cost || 0,
         insurance,
@@ -735,7 +745,15 @@ function ResultsPage() {
                   variant="contained"
                   size="small"
                   startIcon={<MapIcon />}
-                  onClick={() => setShowTimeline(!showTimeline)}
+                  onClick={() => {
+                    setShowTimeline(!showTimeline);
+                    if (!showTimeline) {
+                      // Scroll to timeline after it renders
+                      setTimeout(() => {
+                        tripTimelineRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 150);
+                    }
+                  }}
                 >
                   {showTimeline ? "Hide Plan" : "View Trip"}
                 </Button>
@@ -813,6 +831,7 @@ function ResultsPage() {
         <AnimatePresence>
           {showItinerary && itineraryPlan && (
             <motion.div
+              ref={itinerarySectionRef}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
@@ -866,6 +885,7 @@ function ResultsPage() {
         <AnimatePresence>
           {showTimeline && itinerary.length > 0 && (
             <motion.div
+              ref={tripTimelineRef}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}

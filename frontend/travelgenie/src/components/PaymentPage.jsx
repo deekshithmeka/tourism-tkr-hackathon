@@ -30,6 +30,10 @@ import DownloadIcon from "@mui/icons-material/Download";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import BadgeIcon from "@mui/icons-material/Badge";
+import DeleteIcon from "@mui/icons-material/Delete";
+import GroupIcon from "@mui/icons-material/Group";
 
 const API_BASE = "http://localhost:8000";
 
@@ -49,6 +53,7 @@ export default function PaymentPage() {
   const {
     tripTotal = 0,
     travelMode = "car",
+    groupSize = 1,
     guide = false,
     guideCost = 0,
     insurance = true,
@@ -70,6 +75,36 @@ export default function PaymentPage() {
   const [receipt, setReceipt] = useState(null);
   const [error, setError] = useState(null);
 
+  // Government ID upload state
+  const [govtIdFile, setGovtIdFile] = useState(null);
+  const [govtIdPreview, setGovtIdPreview] = useState(null);
+
+  const handleGovtIdUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowed.includes(file.type)) {
+      setError("Please upload a valid image (JPG/PNG) or PDF for your Government ID.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size must be under 5 MB.");
+      return;
+    }
+    setGovtIdFile(file);
+    setError(null);
+    if (file.type.startsWith("image/")) {
+      setGovtIdPreview(URL.createObjectURL(file));
+    } else {
+      setGovtIdPreview(null);
+    }
+  };
+
+  const handleRemoveGovtId = () => {
+    setGovtIdFile(null);
+    setGovtIdPreview(null);
+  };
+
   // Tax calculations (dynamic insurance based on trip duration)
   const gst = Math.round(tripTotal * 0.05);
   const computedInsurance = Math.max(99, days * 50);
@@ -84,6 +119,10 @@ export default function PaymentPage() {
       setError("Please enter your name.");
       return;
     }
+    if (!govtIdFile) {
+      setError("Please upload a Government ID as proof before proceeding.");
+      return;
+    }
     setProcessing(true);
     setError(null);
     try {
@@ -93,6 +132,7 @@ export default function PaymentPage() {
         body: JSON.stringify({
           trip_total: tripTotal,
           travel_mode: travelMode,
+          group_size: groupSize,
           guide,
           guide_cost: guideCost,
           insurance,
@@ -100,6 +140,7 @@ export default function PaymentPage() {
           customer_name: customerName,
           customer_email: customerEmail,
           customer_phone: customerPhone,
+          govt_id_filename: govtIdFile?.name || "",
           destinations,
           days,
           budget,
@@ -128,6 +169,7 @@ export default function PaymentPage() {
       ["", ""],
       ["Destinations", receipt.trip_summary?.destinations?.join(", ") || "—"],
       ["Duration", `${receipt.trip_summary?.days} day(s)`],
+      ["Group Size", `${receipt.trip_summary?.group_size || 1} person(s)`],
       ["Transport", receipt.trip_summary?.travel_mode || "—"],
       ["Guide", receipt.trip_summary?.guide ? "Yes" : "No"],
       ["", ""],
@@ -282,6 +324,9 @@ export default function PaymentPage() {
                   {destinations.join(" → ")}
                 </Typography>
               )}
+              {groupSize > 1 && (
+                <Chip icon={<GroupIcon />} label={`${groupSize} people`} size="small" color="secondary" sx={{ mt: 0.5 }} />
+              )}
             </Paper>
 
             {/* Cost breakdown */}
@@ -359,6 +404,88 @@ export default function PaymentPage() {
                 size="small"
               />
             </Stack>
+
+            {/* Government ID Upload */}
+            <Divider sx={{ mb: 2 }} />
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 0.5 }}>
+              <BadgeIcon sx={{ fontSize: 18 }} /> Upload Government ID <Typography component="span" color="error.main" sx={{ fontWeight: 700 }}>*</Typography>
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+              Upload a valid government-issued photo ID (Aadhaar, PAN, Passport, Voter ID, or Driving License) as proof of identity. Accepted: JPG, PNG, or PDF (max 5 MB).
+            </Typography>
+
+            {!govtIdFile ? (
+              <Box
+                component="label"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  py: 4,
+                  px: 2,
+                  mb: 3,
+                  border: "2px dashed",
+                  borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)",
+                  borderRadius: 3,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    bgcolor: isDark ? "rgba(15,118,110,0.06)" : "rgba(15,118,110,0.04)",
+                  },
+                }}
+              >
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  hidden
+                  onChange={handleGovtIdUpload}
+                />
+                <CloudUploadIcon sx={{ fontSize: 40, color: "primary.main", mb: 1 }} />
+                <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+                  Click to upload or drag & drop
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  JPG, PNG, or PDF — max 5 MB
+                </Typography>
+              </Box>
+            ) : (
+              <Paper
+                variant="outlined"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  p: 2,
+                  mb: 3,
+                  borderRadius: 3,
+                  borderColor: "#10B981",
+                  bgcolor: isDark ? "rgba(16,185,129,0.06)" : "rgba(16,185,129,0.04)",
+                }}
+              >
+                {govtIdPreview ? (
+                  <Box
+                    component="img"
+                    src={govtIdPreview}
+                    alt="Government ID preview"
+                    sx={{ width: 80, height: 56, objectFit: "cover", borderRadius: 2, border: "1px solid", borderColor: "divider" }}
+                  />
+                ) : (
+                  <BadgeIcon sx={{ fontSize: 40, color: "#10B981" }} />
+                )}
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{govtIdFile.name}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {(govtIdFile.size / 1024).toFixed(1)} KB — {govtIdFile.type.split("/")[1]?.toUpperCase()}
+                  </Typography>
+                </Box>
+                <Button size="small" color="error" startIcon={<DeleteIcon />} onClick={handleRemoveGovtId}>
+                  Remove
+                </Button>
+              </Paper>
+            )}
 
             {/* Payment method */}
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>Payment Method</Typography>
