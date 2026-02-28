@@ -1,0 +1,27 @@
+/* App-level styles */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass card utility */
+.glass {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* Refined button press */
+button:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+/* Image smoothing */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
