@@ -47,7 +47,7 @@ import DestinationCard from "./DestinationCard";
 import TripTimeline from "./TripTimeline";
 import ItineraryTable from "./ItineraryTable";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const TRAVEL_MODES = [
   { value: "bus", label: "Bus", icon: <DirectionsBusIcon sx={{ fontSize: 18 }} /> },

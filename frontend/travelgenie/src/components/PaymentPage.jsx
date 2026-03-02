@@ -35,7 +35,7 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import DeleteIcon from "@mui/icons-material/Delete";
 import GroupIcon from "@mui/icons-material/Group";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const PAYMENT_METHODS = [
   { value: "upi", label: "UPI", icon: <PhoneAndroidIcon sx={{ fontSize: 18 }} /> },

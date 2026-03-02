@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import places, itinerary, payment
@@ -8,10 +10,18 @@ app = FastAPI(
     version="2.0.0",
 )
 
-# Allow the Vite dev server (and any origin in dev)
+# CORS config via env:
+# - CORS_ALLOW_ORIGINS: comma-separated list of origins
+# - defaults include local frontend dev origins
+cors_allow_origins = os.getenv(
+    "CORS_ALLOW_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+)
+allowed_origins = [origin.strip() for origin in cors_allow_origins.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

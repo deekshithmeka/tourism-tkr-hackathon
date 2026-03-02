@@ -175,6 +175,54 @@ Runs at: `http://localhost:5173`
 
 ---
 
+## ☁️ Deploy Frontend + Backend
+
+Quick config files are included:
+
+- `render.yaml` at repo root for backend service definition on Render
+- `frontend/travelgenie/vercel.json` for SPA routing on Vercel
+
+### 1) Deploy Backend (Render)
+
+1. Push this repo to GitHub.
+2. In Render, create a **New Web Service** from your repo.
+    - If Render detects `render.yaml`, you can use **Blueprint deploy** directly.
+3. Configure:
+    - **Root Directory:** `backend`
+    - **Build Command:** `pip install -r requirements.txt`
+    - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Add environment variable:
+    - `CORS_ALLOW_ORIGINS=https://<your-frontend-domain>`
+5. Deploy and copy your backend URL (example: `https://travelgenie-api.onrender.com`).
+
+### 2) Deploy Frontend (Vercel)
+
+1. In Vercel, create a **New Project** from the same repo.
+2. Configure:
+    - **Root Directory:** `frontend/travelgenie`
+    - **Build Command:** `npm run build`
+    - **Output Directory:** `dist`
+    - `vercel.json` already handles React Router SPA fallback.
+3. Add environment variable:
+    - `VITE_API_BASE_URL=https://<your-backend-domain>`
+4. Deploy and copy your frontend URL.
+
+### 3) Final CORS Update
+
+After frontend deployment, update backend env in Render:
+
+`CORS_ALLOW_ORIGINS=https://<your-frontend-domain>,http://localhost:5173`
+
+Redeploy backend once after this update.
+
+### Notes
+
+- Frontend API URL is now env-driven via `VITE_API_BASE_URL`.
+- Backend CORS is now env-driven via `CORS_ALLOW_ORIGINS`.
+- Local development defaults still work (`http://localhost:5173` ↔ `http://localhost:8000`).
+
+---
+
 ## 📡 API Endpoints
 
 | Method | Endpoint | Description |
