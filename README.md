@@ -193,3 +193,7 @@ Runs at: `http://localhost:5173`
 ---
 
 ### 👥 Made by Team **Bug Slayers** · TKR Hackathon 2026
+## Team:
+- Khushal Viswas (Team Lead)
+- Om Sudhamsh
+- Deekshith and Mukesh
