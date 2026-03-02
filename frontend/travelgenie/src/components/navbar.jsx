@@ -13,11 +13,12 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import HomeIcon from "@mui/icons-material/Home";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
-import MapIcon from "@mui/icons-material/Map";
+import GroupIcon from "@mui/icons-material/Group";
 
 const navItems = [
   { label: "Home", path: "/", icon: <HomeIcon sx={{ fontSize: 18 }} /> },
   { label: "Search", path: "/search", icon: <TravelExploreIcon sx={{ fontSize: 18 }} /> },
+  { label: "Team Members", path: "/team-members", icon: <GroupIcon sx={{ fontSize: 18 }} /> },
 ];
 
 function Navbar({ mode, setMode }) {

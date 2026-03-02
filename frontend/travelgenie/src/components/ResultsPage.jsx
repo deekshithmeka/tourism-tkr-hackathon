@@ -348,7 +348,7 @@ function ResultsPage() {
               {error}
             </Alert>
             <Typography variant="body1" color="text.secondary">
-              Please check that the backend is running on port 8000 and try again.
+              Please verify your backend URL (VITE_API_BASE_URL) and backend CORS settings, then try again.
             </Typography>
           </Box>
         )}
